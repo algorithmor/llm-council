@@ -1,0 +1,16 @@
+# Versions match the competition runtime where it pins them.
+faster-whisper==1.2.1
+ctranslate2==4.8.2
+transformers==4.57.6
+qwen-asr==0.0.6
+# score.py's own imports, plus scoring and diagnostics
+jiwer
+typer
+pandas
+numpy
+rapidfuzz
+wordfreq
+soundfile
+librosa
+pytest
+# Optional, GPU only, same as the runtime (needs torch 2.11 for CUDA 13): vllm==0.23.0

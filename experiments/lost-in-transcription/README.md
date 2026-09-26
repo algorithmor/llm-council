@@ -1,0 +1,127 @@
+# Lost in Transcription (Spanish–English): approach bake-off
+
+Tools for trying several ASR approaches on labelled data and deciding which ones are really better,
+for the Mozilla Data Collective / DrivenData *Lost in Transcription* Spanish–English track.
+
+| File | What it does |
+|---|---|
+| `run_systems.py` | Transcribes a clip folder with any number of approaches (faster-whisper, Qwen3-ASR; forced or auto language; context prompts) into one submission-format CSV each, with timing. |
+| `compare.py` | Scores those CSVs with the organisers' own normaliser (imported from `score.py`), then adds bootstrap confidence intervals, paired differences, casing / filler / Spanish / English / switch-point error rates, the oracle, and ROVER / MBR combinations. |
+| `make_long_set.py` | Concatenates labelled clips into 60–240 s recordings, because test clips run to about 4 min while dev clips are mostly short. |
+| `tests/` | Checks that `compare.py` reproduces the official scorer exactly, plus the statistics, ROVER and diagnostics. |
+
+## Why not compare on the test set
+
+The test transcripts are hidden and the test audio only exists inside the scoring sandbox
+(`/code_execution/data`). Logs may not contain test information, and you get 3 scored submissions per
+rolling 7 days. So the leaderboard can confirm one or two finalists, but it can't rank ten approaches.
+Choosing among many variants by leaderboard score also overfits the public test set.
+
+Compare on labelled data you hold, as three sets, and prefer changes that win on all of them:
+
+1. **dev**: the official dev set (155 test-like voice notes, about 35 min).
+2. **held-out Miami**: speaker-disjoint Bangor Miami turns that no model was trained on.
+3. **long**: `make_long_set.py` output built from dev, to catch long-audio failures.
+
+## Quick start (Colab or any GPU box)
+
+```bash
+git clone -b claude/zen-newton-hvt9n9 https://github.com/algorithmor/llm-council
+git clone https://github.com/drivendataorg/lost-in-transcription-runtime   # official score.py
+cd llm-council/experiments/lost-in-transcription
+pip install -r requirements.txt
+```
+
+Put the dev download in `data/dev/clips/` and write its labels as `data/dev/gold.csv` with columns
+`audio_filename,transcript`.
+
+```bash
+# 1. One prediction CSV per approach (each runs in its own process; existing CSVs are skipped)
+python run_systems.py --manifest data/dev/gold.csv --clips data/dev/clips --out-dir runs/dev \
+  --system "wh_auto=whisper:large-v3" \
+  --system "wh_es=whisper:large-v3?lang=es" \
+  --system "wh_en=whisper:large-v3?lang=en" \
+  --system "qwen_auto=qwen3-asr:Qwen/Qwen3-ASR-1.7B" \
+  --system "qwen_merge=qwen3-asr:Qwen/Qwen3-ASR-1.7B?context=runs/dev/wh_es.csv+runs/dev/wh_en.csv"
+
+# 2. Compare (the scorer is found automatically when the runtime checkout sits next to llm-council)
+python compare.py --ref data/dev/gold.csv runs/dev/*.csv \
+  --combine wh_auto,wh_es,wh_en --meta runs/dev/info/meta.csv --by duration_s:10,30,60 \
+  --out-dir results/dev
+
+# 3. Long-form check
+python make_long_set.py --gold data/dev/gold.csv --clips data/dev/clips --out-dir data/long
+python run_systems.py --manifest data/long/gold.csv --clips data/long/clips --out-dir runs/long --system ...
+python compare.py --ref data/long/gold.csv runs/long/*.csv
+```
+
+System specs are `NAME=FAMILY:MODEL?key=value&...`. The model can be a hub id or a local path, so
+fine-tuned checkpoints plug in the same way: a CTranslate2 export for `whisper:`, or a merged
+Hugging Face directory for `qwen3-asr:`. The full option list is in the docstring at the top of
+`run_systems.py`.
+
+Qwen3-ASR uses vLLM when it is installed and a GPU is present, and falls back to transformers
+otherwise (`backend=transformers` forces it). The competition runtime pins `vllm==0.23.0`, which
+needs torch 2.11 built for CUDA 13; if that is awkward on Colab, the transformers backend gives the
+same transcripts, just more slowly.
+
+## Approaches worth a first run
+
+| Idea | Systems | What to look at |
+|---|---|---|
+| Zero-shot baselines | `wh_auto`, `qwen_auto` | Where you start; zero-shot scores are far from fine-tuned ones. |
+| "Two monolingual threads" | `wh_es`, `wh_en` (and `qwen3-asr ...?lang=es`, `lang=en`) plus `--combine` | es-word vs en-word error of each thread; whether ROVER over the threads beats `wh_auto`. |
+| Threads merged by a model that hears the audio | `qwen_merge` (`context=` the two thread CSVs) | Does it beat `qwen_auto`? |
+| Code-switched prompt for Whisper | `whisper:large-v3?prompt_file=cs_prompt.txt` with a short Spanglish example | Switch-word error. |
+| Your fine-tuned models | `whisper:/path/to/ct2`, `qwen3-asr:/path/to/merged` | The main comparison. |
+| Ensembles of different families | `--combine a,b,c` (and `--weights a=2`) | ROVER vs the best member; the oracle row shows the headroom. |
+
+To add another model family (Voxtral, Granite-Speech, VibeVoice), add a `run_<family>` function
+to `run_systems.py` that maps a list of 16 kHz arrays to transcripts.
+
+## Reading the report
+
+```
+| system | WER | 95% CI | Δ vs best | Δ 95% CI | P(beats best) |
+```
+
+- **WER** is exactly what `score.py` reports on this set; the tests assert that.
+- **Δ 95% CI** is a *paired* bootstrap over clips. Both systems see the same clips, so this interval
+  is much tighter than the two separate CIs. If it contains 0, the two systems are tied on this set.
+- Use `--cluster-col speaker` with a `--meta` file to resample whole speakers instead of clips; the
+  interval is more honest when one speaker has many clips.
+- **oracle** is the WER if you could pick the best system for every clip. If it is close to the best
+  single system, no selection or ensemble method has room to help.
+
+The second table explains *why* a system wins or loses:
+
+| Column | Meaning |
+|---|---|
+| sub / del / ins | Error types. A high deletion rate on long clips usually means early stopping. |
+| WER ignoring case | The gap to WER is the cost of casing alone; casing is scored except sentence-initial letters. |
+| filler error | Share of reference fillers (uh, um, eh, mhm…) missed. The references are verbatim. |
+| es-word / en-word error | Reference words of each language that were substituted or deleted. Translating or anglicising Spanish shows up as es ≫ en. |
+| switch-word error | The first word after each language switch, a PIER-style code-switching metric. |
+
+Language tags come from `wordfreq` frequencies, which can't label words common to both languages
+(no, a, me); those count as ambiguous and are left out. Pass `--lang-lexicon word,lang.csv` to
+use your own tags, for example ones built from Miami's `@s:` annotations.
+
+## Decision rules that survive a small dev set
+
+1. **Adopt a change only if its paired Δ CI excludes 0 on dev and it doesn't lose on held-out Miami
+   or long.** With 155 clips, one system's WER moves by about ±0.01 from sampling alone; the paired
+   interval tells you whether a smaller difference between two systems is real.
+2. **Never tune and measure on the same clips.** Pick rule sets, ROVER weights and thresholds on one
+   half of dev and report the other half, or cross-validate. Otherwise dev stops predicting the
+   leaderboard.
+3. **Check speed as well as accuracy.** `runs/*/info/NAME.timing.json` gives decode time per audio
+   second. The platform allows 2 h on one A100 for all 592 test clips, including model loading.
+4. **Spend leaderboard submissions on finalists only,** and log dev and leaderboard scores side by
+   side so you know the offset. Another team saw the leaderboard sit about 0.03 above dev.
+
+## Tests
+
+```bash
+LIT_SCORE_PY=../../../lost-in-transcription-runtime/score.py python -m pytest tests -q
+```
