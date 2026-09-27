@@ -34,6 +34,7 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
+import re
 import subprocess
 import sys
 import time
@@ -119,10 +120,14 @@ def run_whisper(system: dict, audios: list[np.ndarray], log) -> list[str]:
     from faster_whisper import BatchedInferencePipeline, WhisperModel
 
     opts = system["opts"]
-    gpu = cuda_available()
+    device = "cuda" if cuda_available() else "cpu"
+
+    def load(dev):
+        return WhisperModel(system["model"], device=dev,
+                            compute_type=opts.get("compute_type", "float16" if dev == "cuda" else "int8"))
+
     t0 = time.time()
-    model = WhisperModel(system["model"], device="cuda" if gpu else "cpu",
-                         compute_type=opts.get("compute_type", "float16" if gpu else "int8"))
+    model = load(device)
     log(f"model loaded in {time.time() - t0:.0f}s", load_seconds=time.time() - t0)
     lang = opts.get("lang", "auto")
     kwargs = dict(
@@ -134,13 +139,27 @@ def run_whisper(system: dict, audios: list[np.ndarray], log) -> list[str]:
     )
     batch = int(opts.get("batch", 0))
     pipe = BatchedInferencePipeline(model) if batch > 0 else None
-    texts = []
-    for i, audio in enumerate(audios):
+    def decode(audio):
         if pipe:  # the batched pipeline always segments with VAD
             segments, _ = pipe.transcribe(audio, batch_size=batch, vad_filter=True, **kwargs)
         else:
             segments, _ = model.transcribe(audio, vad_filter=flag(opts, "vad", False), **kwargs)
-        texts.append(" ".join(s.text.strip() for s in segments).strip())
+        return " ".join(s.text.strip() for s in segments).strip()  # errors surface while iterating
+
+    texts = []
+    for i, audio in enumerate(audios):
+        try:
+            texts.append(decode(audio))
+        except RuntimeError as exc:
+            # CTranslate2 opens cuBLAS/cuDNN at the first GPU computation, so a missing CUDA 12
+            # library only shows up here. Fall back to CPU instead of losing the run.
+            if device != "cuda" or i > 0 or not re.search(r"cublas|cudnn|cuda", str(exc), re.I):
+                raise
+            log(f"GPU decoding failed ({exc}); falling back to CPU int8")
+            device = "cpu"
+            model = load(device)
+            pipe = BatchedInferencePipeline(model) if batch > 0 else None
+            texts.append(decode(audio))
         if (i + 1) % 25 == 0 or i + 1 == len(audios):
             log(f"{i + 1}/{len(audios)} clips")
     return texts

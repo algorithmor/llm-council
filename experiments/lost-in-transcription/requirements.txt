@@ -3,6 +3,7 @@ faster-whisper==1.2.1
 ctranslate2==4.8.2
 transformers==4.57.6
 qwen-asr==0.0.6
+peft==0.20.0
 # score.py's own imports, plus scoring and diagnostics
 jiwer
 typer
