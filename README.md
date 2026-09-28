@@ -85,7 +85,3 @@ Then open http://localhost:5173 in your browser.
 - **Frontend:** React + Vite, react-markdown for rendering
 - **Storage:** JSON files in `data/conversations/`
 - **Package Management:** uv for Python, npm for JavaScript
-
-## ChildNet GUI
-
-This repository also contains [`childnet_gui/`](childnet_gui/), a separate Gradio app for [ChildNet](https://github.com/MartinPernus/ChildNet) kinship face synthesis: it predicts a child's face from photos of both parents, with sliders for the dominant parent, age, gender and more. It runs locally or on Google Colab and shares no code or dependencies with LLM Council. See [its README](childnet_gui/README.md).

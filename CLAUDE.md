@@ -164,15 +164,3 @@ Frontend: Display with tabs + validation UI
 ```
 
 The entire flow is async/parallel where possible to minimize latency.
-
-## ChildNet GUI (`childnet_gui/`)
-
-Separate from LLM Council: a Gradio GUI for https://github.com/MartinPernus/ChildNet. Its dependencies (torch, gradio, dlib-bin) live in `childnet_gui/requirements.txt`, not `pyproject.toml`, so the LLM Council install stays light.
-
-- Run from the repo root: `python -m childnet_gui --childnet-dir /path/to/ChildNet` (relative imports, like the backend).
-- `engine.py` imports ChildNet from a checkout without modifying it. It registers ChildNet's `models` package explicitly (no `__init__.py`, generic name), stubs the e4e ops that JIT-compile CUDA at import, and re-implements `GeneModel.forward` with per-layer `move2parent`. Tests assert bitwise parity with ChildNet's own forward pass; keep it that way.
-- Model construction patches `torch.load` (relative `checkpoints/` paths, `weights_only` fallback for files in the checkout) and skips random init and StyleGAN's 100k-sample W statistics, because ChildNet's strict state-dict loads overwrite everything.
-- `app.py`: live updates use `gr.on(..., trigger_mode="always_last")` plus a per-session `gr.State` memo that skips repeated requests (an example click fires two change events). In a multi-output update list, each `gr.update(...)` must be its own dict; Gradio consumes their keys.
-- Gradio 5 takes `theme` in `gr.Blocks()`, Gradio 6 in `launch()`; `THEME_IN_LAUNCH` detects which.
-- Tests: `CHILDNET_DIR=/path/to/ChildNet python -m pytest childnet_gui/tests`. They write ~4 GB of random-weight checkpoints (`tests/fake_checkpoints.py`) to a temp dir, so no weights download is needed.
-- The Colab notebook `ChildNet_GUI.ipynb` clones this repo at `GUI_BRANCH`, falling back to the default branch; update that if the GUI moves.
