@@ -1,0 +1,12 @@
+# ChildNet GUI. For NVIDIA GPU support, install PyTorch for your CUDA version first:
+# https://pytorch.org/get-started/locally/
+torch
+numpy
+numpy<2; platform_system == "Darwin" and platform_machine == "x86_64"  # Intel Macs top out at torch 2.2, built for NumPy 1
+pillow>=9.1
+gradio>=5.0
+# ChildNet's own code imports these when it loads
+requests
+setuptools; python_version >= "3.12"  # provides distutils
+# Automatic face alignment (Intel Macs: `pip install dlib` builds it from source)
+dlib-bin; platform_system != "Darwin" or platform_machine == "arm64"
