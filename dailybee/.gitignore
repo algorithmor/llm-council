@@ -1,0 +1,10 @@
+/_output
+/out
+/yarr
+*.db
+*.db-shm
+*.db-wal
+*.syso
+versioninfo.rc
+.DS_Store
+node_modules/

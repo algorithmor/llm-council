@@ -1,0 +1,400 @@
+package server
+
+import (
+	"fmt"
+	"log"
+	"net/http"
+	"net/url"
+	"strconv"
+	"strings"
+	"time"
+
+	"github.com/nkanaev/yarr/src/server/middleware"
+	"github.com/nkanaev/yarr/src/storage"
+	"github.com/nkanaev/yarr/src/storage/model"
+)
+
+type FeverGroup struct {
+	ID    int64  `json:"id"`
+	Title string `json:"title"`
+}
+
+type FeverFeedsGroup struct {
+	GroupID int64  `json:"group_id"`
+	FeedIDs string `json:"feed_ids"`
+}
+
+type FeverFeed struct {
+	ID          int64  `json:"id"`
+	FaviconID   int64  `json:"favicon_id"`
+	Title       string `json:"title"`
+	Url         string `json:"url"`
+	SiteUrl     string `json:"site_url"`
+	IsSpark     int    `json:"is_spark"`
+	LastUpdated int64  `json:"last_updated_on_time"`
+}
+
+type FeverItem struct {
+	ID        int64  `json:"id"`
+	FeedID    int64  `json:"feed_id"`
+	Title     string `json:"title"`
+	Author    string `json:"author"`
+	HTML      string `json:"html"`
+	Url       string `json:"url"`
+	IsSaved   int    `json:"is_saved"`
+	IsRead    int    `json:"is_read"`
+	CreatedAt int64  `json:"created_on_time"`
+}
+
+type FeverFavicon struct {
+	ID   int64  `json:"id"`
+	Data string `json:"data"`
+}
+
+func writeFeverJSON(w http.ResponseWriter, data map[string]any, lastRefreshed int64) {
+	data["api_version"] = 3
+	data["auth"] = 1
+	// TODO: remove duplicates
+	data["last_refreshed_on_time"] = lastRefreshed
+	writeJSON(w, http.StatusOK, data)
+}
+
+// TODO: remove
+func getLastRefreshedOnTime(feedStates []model.FeedState) int64 {
+	var lastRefreshed int64
+	for _, state := range feedStates {
+		if state.LastRefreshed.Unix() > lastRefreshed {
+			lastRefreshed = state.LastRefreshed.Unix()
+		}
+	}
+	return lastRefreshed
+}
+
+func (s *Server) feverAuth(r *http.Request) bool {
+	if s.Auth == nil {
+		return false
+	}
+	apiKey := r.FormValue("api_key")
+	apiKey = strings.ToLower(apiKey)
+	if !middleware.StringsEqual(apiKey, s.Auth.FeverAPIKey(r)) {
+		return false
+	}
+	return true
+}
+
+func formHasValue(values url.Values, value string) bool {
+	if _, ok := values[value]; ok {
+		return true
+	}
+	return false
+}
+
+func (s *Server) handleFever(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	if !s.feverAuth(r) {
+		writeJSON(w, http.StatusOK, map[string]any{
+			"api_version":            3,
+			"auth":                   0,
+			"last_refreshed_on_time": 0,
+		})
+		return
+	}
+
+	switch {
+	case formHasValue(r.Form, "groups"):
+		s.feverGroupsHandler(w, r)
+	case formHasValue(r.Form, "feeds"):
+		s.feverFeedsHandler(w, r)
+	case formHasValue(r.Form, "unread_item_ids"):
+		s.feverUnreadItemIDsHandler(w, r)
+	case formHasValue(r.Form, "saved_item_ids"):
+		s.feverSavedItemIDsHandler(w, r)
+	case formHasValue(r.Form, "favicons"):
+		s.feverFaviconsHandler(w, r)
+	case formHasValue(r.Form, "items"):
+		s.feverItemsHandler(w, r)
+	case formHasValue(r.Form, "links"):
+		s.feverLinksHandler(w, r)
+	case formHasValue(r.Form, "mark"):
+		s.feverMarkHandler(w, r)
+	default:
+		states, _ := s.db(r).ListFeedStates()
+		writeJSON(w, http.StatusOK, map[string]any{
+			"api_version":            3,
+			"auth":                   1,
+			"last_refreshed_on_time": getLastRefreshedOnTime(states),
+		})
+	}
+}
+
+func joinInts(values []int64) string {
+	var result strings.Builder
+	for i, val := range values {
+		fmt.Fprintf(&result, "%d", val)
+		if i != len(values)-1 {
+			result.WriteString(",")
+		}
+	}
+	return result.String()
+}
+
+func feedGroups(db storage.Storage) []*FeverFeedsGroup {
+	feeds := db.ListFeeds()
+
+	groupFeeds := make(map[int64][]int64)
+	for _, feed := range feeds {
+		if feed.FolderId == nil {
+			continue
+		}
+		groupFeeds[*feed.FolderId] = append(groupFeeds[*feed.FolderId], feed.Id)
+	}
+	result := make([]*FeverFeedsGroup, 0)
+	for groupId, feedIds := range groupFeeds {
+		result = append(result, &FeverFeedsGroup{
+			GroupID: groupId,
+			FeedIDs: joinInts(feedIds),
+		})
+	}
+	return result
+}
+
+func (s *Server) feverGroupsHandler(w http.ResponseWriter, r *http.Request) {
+	folders := s.db(r).ListFolders()
+	groups := make([]*FeverGroup, len(folders))
+	for i, folder := range folders {
+		groups[i] = &FeverGroup{ID: folder.Id, Title: folder.Title}
+	}
+	states, _ := s.db(r).ListFeedStates()
+	writeFeverJSON(w, map[string]any{
+		"groups":       groups,
+		"feeds_groups": feedGroups(s.db(r)),
+	}, getLastRefreshedOnTime(states))
+}
+
+func (s *Server) feverFeedsHandler(w http.ResponseWriter, r *http.Request) {
+	feeds := s.db(r).ListFeeds()
+	states, _ := s.db(r).ListFeedStates()
+	statesMap := make(map[int64]model.FeedState)
+	for _, state := range states {
+		statesMap[state.FeedID] = state
+	}
+
+	feverFeeds := make([]*FeverFeed, len(feeds))
+	for i, feed := range feeds {
+		var lastUpdated int64
+		if state, ok := statesMap[feed.Id]; ok {
+			lastUpdated = state.LastRefreshed.Unix()
+		}
+		feverFeeds[i] = &FeverFeed{
+			ID:          feed.Id,
+			FaviconID:   feed.Id,
+			Title:       feed.Title,
+			Url:         feed.FeedLink,
+			SiteUrl:     feed.Link,
+			IsSpark:     0,
+			LastUpdated: lastUpdated,
+		}
+	}
+	writeFeverJSON(w, map[string]any{
+		"feeds":        feverFeeds,
+		"feeds_groups": feedGroups(s.db(r)),
+	}, getLastRefreshedOnTime(states))
+}
+
+func (s *Server) feverFaviconsHandler(w http.ResponseWriter, r *http.Request) {
+	feeds := s.db(r).ListFeeds()
+	favicons := make([]*FeverFavicon, len(feeds))
+	for i, feed := range feeds {
+		data := "data:image/gif;base64,R0lGODlhAQABAAAAACw="
+		if feed.Icon != nil {
+			data = feed.Icon.DataURI()
+		}
+		favicons[i] = &FeverFavicon{ID: feed.Id, Data: data}
+	}
+
+	states, _ := s.db(r).ListFeedStates()
+	writeFeverJSON(w, map[string]any{
+		"favicons": favicons,
+	}, getLastRefreshedOnTime(states))
+}
+
+// for memory pressure reasons, we only return a limited number of items
+// documented at https://github.com/DigitalDJ/tinytinyrss-fever-plugin/blob/master/fever-api.md#items
+const listLimit = 50
+
+func (s *Server) feverItemsHandler(w http.ResponseWriter, r *http.Request) {
+	filter := model.ItemFilter{}
+	query := r.URL.Query()
+
+	switch {
+	case query.Get("with_ids") != "":
+		ids := make([]int64, 0)
+		for idstr := range strings.SplitSeq(query.Get("with_ids"), ",") {
+			if idnum, err := strconv.ParseInt(idstr, 10, 64); err == nil {
+				ids = append(ids, idnum)
+			}
+		}
+		filter.IDs = &ids
+	case query.Get("since_id") != "":
+		idstr := query.Get("since_id")
+		if idnum, err := strconv.ParseInt(idstr, 10, 64); err == nil {
+			filter.SinceID = &idnum
+		}
+	case query.Get("max_id") != "":
+		idstr := query.Get("max_id")
+		if idnum, err := strconv.ParseInt(idstr, 10, 64); err == nil {
+			filter.MaxID = &idnum
+		}
+	}
+
+	items := s.db(r).ListItems(filter, listLimit, true, true)
+
+	feverItems := make([]FeverItem, len(items))
+	for i, item := range items {
+		date := item.Date
+		time := date.Unix()
+
+		isSaved := 0
+		if item.Status == model.STARRED {
+			isSaved = 1
+		}
+		isRead := 0
+		if item.Status == model.READ {
+			isRead = 1
+		}
+		feverItems[i] = FeverItem{
+			ID:        item.Id,
+			FeedID:    item.FeedId,
+			Title:     item.Title,
+			Author:    "",
+			HTML:      item.Content,
+			Url:       item.Link,
+			IsSaved:   isSaved,
+			IsRead:    isRead,
+			CreatedAt: time,
+		}
+	}
+
+	totalItems := s.db(r).CountItems()
+
+	states, _ := s.db(r).ListFeedStates()
+	writeFeverJSON(w, map[string]any{
+		"items":       feverItems,
+		"total_items": totalItems,
+	}, getLastRefreshedOnTime(states))
+}
+
+func (s *Server) feverLinksHandler(w http.ResponseWriter, r *http.Request) {
+	states, _ := s.db(r).ListFeedStates()
+	writeFeverJSON(w, map[string]any{
+		"links": make([]any, 0),
+	}, getLastRefreshedOnTime(states))
+}
+
+func (s *Server) feverUnreadItemIDsHandler(w http.ResponseWriter, r *http.Request) {
+	status := model.UNREAD
+	itemIds := make([]int64, 0)
+
+	itemFilter := model.ItemFilter{
+		Status: &status,
+	}
+	for {
+		items := s.db(r).ListItems(itemFilter, listLimit, true, false)
+		if len(items) == 0 {
+			break
+		}
+		for _, item := range items {
+			itemIds = append(itemIds, item.Id)
+		}
+		itemFilter.After = &items[len(items)-1].Id
+	}
+	states, _ := s.db(r).ListFeedStates()
+	writeFeverJSON(w, map[string]any{
+		"unread_item_ids": joinInts(itemIds),
+	}, getLastRefreshedOnTime(states))
+}
+
+func (s *Server) feverSavedItemIDsHandler(w http.ResponseWriter, r *http.Request) {
+	status := model.STARRED
+	itemIds := make([]int64, 0)
+
+	itemFilter := model.ItemFilter{
+		Status: &status,
+	}
+	for {
+		items := s.db(r).ListItems(itemFilter, listLimit, true, false)
+		if len(items) == 0 {
+			break
+		}
+		for _, item := range items {
+			itemIds = append(itemIds, item.Id)
+		}
+		itemFilter.After = &items[len(items)-1].Id
+	}
+	states, _ := s.db(r).ListFeedStates()
+	writeFeverJSON(w, map[string]any{
+		"saved_item_ids": joinInts(itemIds),
+	}, getLastRefreshedOnTime(states))
+}
+
+func (s *Server) feverMarkHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.ParseInt(r.Form.Get("id"), 10, 64)
+	if err != nil {
+		log.Print("invalid id:", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	switch r.Form.Get("mark") {
+	case "item":
+		var status model.ItemStatus
+		switch r.Form.Get("as") {
+		case "read":
+			status = model.READ
+		case "unread":
+			status = model.UNREAD
+		case "saved":
+			status = model.STARRED
+		case "unsaved":
+			status = model.READ
+		default:
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		s.db(r).UpdateItem(id, model.UpdateItemParams{Status: &status})
+	case "feed":
+		if r.Form.Get("as") != "read" {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		markFilter := model.MarkFilter{FeedID: &id}
+		x, _ := strconv.ParseInt(r.Form.Get("before"), 10, 64)
+		if x > 0 {
+			before := time.Unix(x, 0).UTC()
+			markFilter.Before = &before
+		}
+		s.db(r).MarkItemsRead(markFilter)
+	case "group":
+		if r.Form.Get("as") != "read" {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		markFilter := model.MarkFilter{}
+		if id > 0 {
+			markFilter.FolderID = &id
+		}
+		x, _ := strconv.ParseInt(r.Form.Get("before"), 10, 64)
+		if x > 0 {
+			before := time.Unix(x, 0).UTC()
+			markFilter.Before = &before
+		}
+		s.db(r).MarkItemsRead(markFilter)
+	default:
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{
+		"api_version": 3,
+		"auth":        1,
+	})
+}
