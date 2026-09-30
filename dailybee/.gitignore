@@ -8,3 +8,5 @@
 versioninfo.rc
 .DS_Store
 node_modules/
+.env
+src/assets/static/bundle.*

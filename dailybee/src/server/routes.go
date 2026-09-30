@@ -48,7 +48,10 @@ func (s *Server) Handler() http.Handler {
 	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/{$}", s.handleIndex)
+	mux.HandleFunc("/{$}", s.securePage(s.handleBulletin))
+	mux.HandleFunc("/setup", s.securePage(s.handleSetup))
+	mux.HandleFunc("/setup/takeout", s.securePage(s.handleTakeoutImport))
+	mux.HandleFunc("/reader", s.handleIndex)
 	mux.HandleFunc("/login", s.handleLogin)
 	mux.HandleFunc("/static/{path...}", http.StripPrefix("/static/", staticFS).ServeHTTP)
 	mux.HandleFunc("/fever/", s.handleFever)
@@ -63,6 +66,8 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("/api/items", secure(s.handleItemList))
 	mux.HandleFunc("/api/items/{id}", secure(s.handleItem))
 	mux.HandleFunc("/api/settings", secure(s.handleSettings))
+	mux.HandleFunc("/api/bulletin", secure(s.handleBulletinAPI))
+	mux.HandleFunc("/api/youtube/sync", secure(s.handleYouTubeSync))
 	mux.HandleFunc("/opml/import", secure(s.handleOPMLImport))
 	mux.HandleFunc("/opml/export", secure(s.handleOPMLExport))
 	mux.HandleFunc("/page", secure(s.handlePageCrawl))
@@ -98,16 +103,16 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 func (s *Server) handleManifest(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{
 		"$schema":     "https://json.schemastore.org/web-manifest-combined.json",
-		"name":        "yarr!",
-		"short_name":  "yarr",
-		"description": "yet another rss reader",
+		"name":        "DailyBee",
+		"short_name":  "DailyBee",
+		"description": "Your daily bulletin of new YouTube videos",
 		"display":     "standalone",
 		"start_url":   "/" + strings.TrimPrefix(s.BasePath, "/"),
 		"icons": []map[string]any{
 			{
-				"src":   s.BasePath + "/static/favicon.png",
-				"sizes": "64x64",
-				"type":  "image/png",
+				"src":   s.BasePath + "/static/dailybee.svg",
+				"sizes": "any",
+				"type":  "image/svg+xml",
 			},
 		},
 	})

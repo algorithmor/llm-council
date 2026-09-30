@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DailyBee · Your daily bulletin</title>
+    <link rel="stylesheet" href="{{ .base }}/static/dailybee.css">
+    <link rel="icon" href="{{ .base }}/static/dailybee.svg" type="image/svg+xml">
+    <link rel="manifest" href="{{ .base }}/manifest.json">
+</head>
+<body data-base="{{ .base }}" {{ if .refreshing }}data-refreshing{{ end }}>
+<header class="topbar">
+    <div class="topbar-inner">
+        <a class="brand" href="{{ .base }}/"><span aria-hidden="true">🐝</span> DailyBee</a>
+        <nav class="nav">
+            <a href="{{ .base }}/" aria-current="page">Bulletin</a>
+            <a href="{{ .base }}/reader">Reader</a>
+            <a href="{{ .base }}/setup">Setup</a>
+        </nav>
+        <button type="button" class="btn ghost small" id="refresh" title="Check every channel for new uploads">
+            <span aria-hidden="true">↻</span> <span class="label">Check for new videos</span>
+        </button>
+    </div>
+</header>
+
+<main class="wrap">
+    <div class="banner" id="refresh-banner" hidden>
+        <span class="spinner" aria-hidden="true"></span>
+        <span id="refresh-text">Checking your channels for new videos…</span>
+    </div>
+
+    {{ if and (not .configured) (eq .bulletin.FeedCount 0) }}
+    <section class="card welcome">
+        <h1>Welcome to DailyBee <span aria-hidden="true">🐝</span></h1>
+        <p>DailyBee reads your YouTube subscriptions and every day gives you a short, calm bulletin
+            of what's new — no feed, no recommendations, no autoplay rabbit hole.</p>
+        <p>To get started, add a YouTube Data API key and your channel.</p>
+        <p><a class="btn primary" href="{{ .base }}/setup">Set up DailyBee</a></p>
+    </section>
+    {{ else }}
+
+    <section class="masthead">
+        <p class="eyebrow" data-today>Today</p>
+        <h1 data-greeting>Your daily bulletin</h1>
+        <p class="lede">
+            {{ if .bulletin.TotalVideos }}
+            <strong>{{ .bulletin.TotalVideos }} new video{{ if ne .bulletin.TotalVideos 1 }}s{{ end }}</strong>
+            from <strong>{{ len .channels }} channel{{ if ne (len .channels) 1 }}s{{ end }}</strong>
+            in the last {{ .windowLabel }}{{ if .watchTime }}, about <strong>{{ .watchTime }}</strong> of watching{{ end }}.
+            {{ if .bulletin.Unwatched }}<span class="muted"><span data-unwatched>{{ .bulletin.Unwatched }}</span> still unwatched.</span>{{ end }}
+            {{ else }}
+            Nothing new in the last {{ .windowLabel }} from the {{ .bulletin.FeedCount }} channels you follow.
+            Enjoy the quiet.
+            {{ end }}
+        </p>
+
+        <div class="controls">
+            <div class="segmented" role="group" aria-label="Time window">
+                {{ range .windows }}
+                <a href="?hours={{ .Hours }}{{ if $.hideShorts }}&shorts=hide{{ else }}&shorts=show{{ end }}"
+                   {{ if .Selected }}aria-current="true"{{ end }}>{{ .Label }}</a>
+                {{ end }}
+            </div>
+            <a class="chip" href="?hours={{ .bulletin.Hours }}&shorts={{ if .hideShorts }}show{{ else }}hide{{ end }}">
+                {{ if .hideShorts }}Show Shorts{{ if .bulletin.HiddenShorts }} ({{ .bulletin.HiddenShorts }}){{ end }}{{ else }}Hide Shorts{{ end }}
+            </a>
+            <label class="chip toggle">
+                <input type="checkbox" id="hide-watched"> Hide watched
+            </label>
+            {{ if .bulletin.Unwatched }}
+            <button type="button" class="chip" id="mark-all">Mark all as watched</button>
+            {{ end }}
+        </div>
+    </section>
+
+    {{ if gt (len .channels) 1 }}
+    <nav class="jump" aria-label="Channels">
+        {{ range .channels }}
+        <a href="#ch-{{ .FeedID }}" class="jump-chip">
+            {{ if .IconURL }}<img src="{{ .IconURL }}" alt="" width="20" height="20">{{ end }}
+            <span>{{ .Title }}</span><span class="count">{{ len .Videos }}</span>
+        </a>
+        {{ end }}
+    </nav>
+    {{ end }}
+
+    {{ range .channels }}
+    <section class="channel" id="ch-{{ .FeedID }}">
+        <header class="channel-head">
+            {{ if .IconURL }}
+            <img class="avatar" src="{{ .IconURL }}" alt="" width="40" height="40">
+            {{ else }}
+            <span class="avatar placeholder" aria-hidden="true">{{ .Initial }}</span>
+            {{ end }}
+            <h2><a href="{{ .URL }}" target="_blank" rel="noopener">{{ .Title }}</a></h2>
+            <span class="count">{{ len .Videos }} new</span>
+        </header>
+
+        {{ range .Videos }}
+        <article class="video{{ if .Watched }} is-watched{{ end }}{{ if .Saved }} is-saved{{ end }}"
+                 data-item="{{ .ItemID }}" data-video="{{ .VideoID }}" data-url="{{ .URL }}"
+                 data-title="{{ .Title }}">
+            <button type="button" class="thumb" data-action="play" aria-label="Watch “{{ .Title }}” here">
+                {{ if .Thumbnail }}<img loading="lazy" src="{{ .Thumbnail }}" alt="">{{ end }}
+                <span class="play" aria-hidden="true">▶</span>
+                {{ if .DurationText }}<span class="badge">{{ .DurationText }}</span>{{ end }}
+                {{ if eq .Live "live" }}<span class="badge live">● LIVE</span>{{ end }}
+                {{ if eq .Live "upcoming" }}<span class="badge upcoming">Upcoming</span>{{ end }}
+                {{ if .IsShort }}<span class="badge short">Short</span>{{ end }}
+            </button>
+            <div class="body">
+                <h3><a href="{{ .URL }}" target="_blank" rel="noopener" data-action="open">{{ .Title }}</a></h3>
+                <p class="meta">
+                    <time datetime="{{ .PublishedISO }}">{{ .Published.Format "Jan 2, 15:04 MST" }}</time>
+                    {{ if .ViewsText }}<span>· {{ .ViewsText }} views</span>{{ end }}
+                    <span class="watched-label">· ✓ Watched</span>
+                    <span class="saved-label">· ★ Saved</span>
+                </p>
+                {{ if .Summary }}<p class="summary">{{ .Summary }}</p>{{ end }}
+                {{ if .HasMore }}
+                <details>
+                    <summary>Full description</summary>
+                    <div class="description">{{ .Description }}</div>
+                </details>
+                {{ end }}
+                <div class="actions">
+                    <button type="button" class="btn primary small" data-action="play">▶ Watch here</button>
+                    <a class="btn small" href="{{ .URL }}" target="_blank" rel="noopener" data-action="open">Open on YouTube ↗</a>
+                    <button type="button" class="btn ghost small" data-action="toggle-watched">
+                        <span class="when-unwatched">Mark watched</span><span class="when-watched">Mark unwatched</span>
+                    </button>
+                    <button type="button" class="btn ghost small" data-action="toggle-saved">
+                        <span class="when-unsaved">☆ Save for later</span><span class="when-saved">★ Saved</span>
+                    </button>
+                </div>
+            </div>
+        </article>
+        {{ end }}
+    </section>
+    {{ end }}
+
+    {{ if and (eq .bulletin.FeedCount 0) .configured }}
+    <section class="card">
+        <h2>No channels yet</h2>
+        {{ if .status.Error }}
+        <p class="error">Last sync failed: {{ .status.Error }}</p>
+        {{ else }}
+        <p>Your subscriptions haven't been synced yet. This happens automatically a few seconds after start-up.</p>
+        {{ end }}
+        <p><a class="btn primary" href="{{ .base }}/setup">Open setup</a></p>
+    </section>
+    {{ end }}
+
+    {{ end }}
+</main>
+
+<footer class="footer">
+    <div class="wrap">
+        {{ if .bulletin.FeedCount }}Following {{ .bulletin.FeedCount }} channels.{{ end }}
+        {{ if not .status.LastRun.IsZero }}Subscriptions last synced <time datetime="{{ .status.LastRun.UTC.Format "2006-01-02T15:04:05Z07:00" }}">{{ .status.LastRun.Format "Jan 2, 15:04" }}</time>.{{ end }}
+        {{ if .requiresAuth }}<button type="button" class="linklike" id="logout">Log out</button>{{ end }}
+        <br><span class="muted">DailyBee is a fork of <a href="https://github.com/nkanaev/yarr" target="_blank" rel="noopener">yarr</a>.
+        New videos come from public channel feeds; the YouTube API is only used for your subscription list and video lengths.</span>
+    </div>
+</footer>
+
+<dialog id="player" aria-labelledby="player-title">
+    <div class="player-frame"><iframe title="YouTube video player" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+    <div class="player-bar">
+        <strong id="player-title"></strong>
+        <a id="player-open" class="btn small" href="#" target="_blank" rel="noopener">Open on YouTube ↗</a>
+        <button type="button" class="btn ghost small" id="player-close">Close</button>
+    </div>
+</dialog>
+
+<script src="{{ .base }}/static/dailybee.js"></script>
+</body>
+</html>

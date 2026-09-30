@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"database/sql"
 	"encoding/json"
 	"log"
 
@@ -109,6 +110,37 @@ func (s *PostgresStorage) UpdateSettings(params model.UpdateSettingsParams) bool
 	}
 
 	if err := tx.Commit(); err != nil {
+		log.Print(err)
+		return false
+	}
+	return true
+}
+
+func (s *PostgresStorage) GetSettingValue(key string, dst any) bool {
+	var val []byte
+	err := s.db.QueryRow(`select val from settings where key = $1`, key).Scan(&val)
+	if err != nil {
+		if err != sql.ErrNoRows {
+			log.Print(err)
+		}
+		return false
+	}
+	return json.Unmarshal(val, dst) == nil
+}
+
+func (s *PostgresStorage) SetSettingValue(key string, val any) bool {
+	valEncoded, err := json.Marshal(val)
+	if err != nil {
+		log.Print(err)
+		return false
+	}
+	_, err = s.db.Exec(`
+		insert into settings (key, val) values ($1, $2)
+		on conflict (key) do update set val = $2`,
+		key,
+		valEncoded,
+	)
+	if err != nil {
 		log.Print(err)
 		return false
 	}

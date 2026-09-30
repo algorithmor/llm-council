@@ -1,0 +1,39 @@
+# DailyBee container image. Works with both `docker build` and `podman build`
+# (image names are fully qualified so Podman needs no short-name config).
+
+# 1. Front-end bundle for the reader UI (the bulletin pages need no build step)
+FROM docker.io/library/node:22-alpine AS assets
+WORKDIR /src
+COPY package.json package-lock.json ./
+RUN npm ci --no-audit --no-fund
+COPY build.js tsconfig.json ./
+COPY src ./src
+RUN npm run build -- --minify
+
+# 2. Go binary (cgo is needed for SQLite)
+FROM docker.io/library/golang:1.26-alpine AS build
+RUN apk add --no-cache build-base
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN go mod download
+COPY cmd ./cmd
+COPY src ./src
+COPY --from=assets /src/src/assets/static/bundle.js /src/src/assets/static/bundle.css ./src/assets/static/
+ARG VERSION=dev
+RUN CGO_ENABLED=1 go build \
+      -tags "sqlite_foreign_keys sqlite_json sqlite_fts5" \
+      -ldflags "-s -w -X main.Version=${VERSION}" \
+      -o /out/dailybee ./cmd/yarr
+
+# 3. Small runtime image, running as an unprivileged user
+FROM docker.io/library/alpine:3
+RUN apk add --no-cache ca-certificates tzdata \
+ && adduser -D -H -u 1000 dailybee \
+ && mkdir /data && chown dailybee:dailybee /data
+COPY --from=build /out/dailybee /usr/local/bin/dailybee
+USER dailybee
+VOLUME /data
+EXPOSE 7070
+HEALTHCHECK --interval=60s --timeout=5s CMD wget -qO /dev/null http://127.0.0.1:7070/manifest.json || exit 1
+ENTRYPOINT ["/usr/local/bin/dailybee"]
+CMD ["-addr", "0.0.0.0:7070", "-db", "/data/dailybee.db"]

@@ -33,6 +33,11 @@ type Storage interface {
 	UpdateFolder(folderId int64, params model.UpdateFolderParams) (bool, error)
 	UpdateItem(id int64, params model.UpdateItemParams) bool
 	UpdateSettings(params model.UpdateSettingsParams) bool
+
+	// DailyBee: arbitrary JSON-encoded values in the settings table, kept out
+	// of model.Settings so secrets (API keys) are never sent to the browser.
+	GetSettingValue(key string, dst any) bool
+	SetSettingValue(key string, val any) bool
 }
 
 func New(path string) (Storage, error) {

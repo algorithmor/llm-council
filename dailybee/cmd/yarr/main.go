@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/nkanaev/yarr/src/assets"
+	"github.com/nkanaev/yarr/src/dailybee"
 	"github.com/nkanaev/yarr/src/platform"
 	"github.com/nkanaev/yarr/src/server"
 	"github.com/nkanaev/yarr/src/storage"
@@ -22,11 +23,14 @@ var GitHash string = "unknown"
 
 var OptList = make([]string, 0)
 
+// opt reads DAILYBEE_<NAME>, falling back to upstream's YARR_<NAME>.
 func opt(envVar, defaultValue string) string {
-	OptList = append(OptList, envVar)
-	value := os.Getenv(envVar)
-	if value != "" {
-		return value
+	name := strings.TrimPrefix(envVar, "YARR_")
+	OptList = append(OptList, "DAILYBEE_"+name)
+	for _, key := range []string{"DAILYBEE_" + name, "YARR_" + name} {
+		if value := os.Getenv(key); value != "" {
+			return value
+		}
 	}
 	return defaultValue
 }
@@ -105,7 +109,7 @@ func main() {
 			log.Fatal("Failed to get config dir: ", err)
 		}
 
-		storagePath := filepath.Join(configPath, "yarr")
+		storagePath := filepath.Join(configPath, "dailybee")
 		if err := os.MkdirAll(storagePath, 0755); err != nil {
 			log.Fatal("Failed to create app config dir: ", err)
 		}
@@ -164,11 +168,18 @@ func main() {
 	srv.Storage = server.NewLocalStorage(store)
 	srv.Scheduler = wrk
 
+	bee := dailybee.NewService(store, wrk)
+	srv.DailyBee = bee
+	if bee.EnvAPIKey != "" {
+		log.Print("dailybee: using YouTube API key from DAILYBEE_YOUTUBE_API_KEY")
+	}
+
 	log.Printf("starting server at %s", srv.GetAddr())
 	if open {
 		platform.Open(srv.GetAddr())
 	}
 	wrk.StartFeedCleaner()
 	wrk.SetRefreshRate(store.GetSettings().RefreshRate)
+	bee.StartAutoSync()
 	platform.Start(srv)
 }

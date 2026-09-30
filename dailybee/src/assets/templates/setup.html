@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DailyBee · Setup</title>
+    <link rel="stylesheet" href="{{ .base }}/static/dailybee.css">
+    <link rel="icon" href="{{ .base }}/static/dailybee.svg" type="image/svg+xml">
+</head>
+<body data-base="{{ .base }}">
+<header class="topbar">
+    <div class="topbar-inner">
+        <a class="brand" href="{{ .base }}/"><span aria-hidden="true">🐝</span> DailyBee</a>
+        <nav class="nav">
+            <a href="{{ .base }}/">Bulletin</a>
+            <a href="{{ .base }}/reader">Reader</a>
+            <a href="{{ .base }}/setup" aria-current="page">Setup</a>
+        </nav>
+    </div>
+</header>
+
+<main class="wrap narrow">
+    <section class="masthead">
+        <h1>Setup</h1>
+        <p class="lede">Connect DailyBee to your YouTube subscriptions.</p>
+    </section>
+
+    {{ if .message }}<div class="notice ok" role="status">{{ .message }} <a href="{{ .base }}/">Go to your bulletin →</a></div>{{ end }}
+    {{ if .error }}<div class="notice err" role="alert">{{ .error }}</div>{{ end }}
+
+    <form class="card form" method="post" action="{{ .base }}/setup" id="setup-form">
+        <div class="field">
+            <label for="api_key">YouTube Data API key</label>
+            {{ if .envKey }}
+            <input id="api_key" type="text" value="{{ .maskedKey }} (set by DAILYBEE_YOUTUBE_API_KEY)" disabled>
+            {{ else }}
+            <input id="api_key" name="api_key" type="password" autocomplete="off" spellcheck="false"
+                   placeholder="{{ if .hasKey }}{{ .maskedKey }} — leave empty to keep{{ else }}AIza…{{ end }}"
+                   {{ if not .hasKey }}required{{ end }}>
+            {{ end }}
+            <p class="hint">Stored only in your local DailyBee database. Never shown to the browser again.</p>
+        </div>
+
+        <div class="field">
+            <label for="channel">Your YouTube channel</label>
+            {{ if .envChannel }}
+            <input id="channel" type="text" value="{{ .config.Channel }} (set by DAILYBEE_YOUTUBE_CHANNEL)" disabled>
+            {{ else }}
+            <input id="channel" name="channel" type="text" spellcheck="false" value="{{ .config.Channel }}"
+                   placeholder="@yourhandle, UC… channel id, or channel URL" required>
+            {{ end }}
+            <p class="hint">Your subscriptions must be public (see below).
+                {{ if .config.ChannelID }}Resolved to <code>{{ .config.ChannelID }}</code>.{{ end }}</p>
+        </div>
+
+        <div class="field row">
+            <div>
+                <label for="hours">Bulletin covers the last</label>
+                <select id="hours" name="hours">
+                    <option value="12" {{ if eq .config.Hours 12 }}selected{{ end }}>12 hours</option>
+                    <option value="24" {{ if eq .config.Hours 24 }}selected{{ end }}>24 hours</option>
+                    <option value="48" {{ if eq .config.Hours 48 }}selected{{ end }}>2 days</option>
+                    <option value="168" {{ if eq .config.Hours 168 }}selected{{ end }}>7 days</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="field">
+            <label class="check"><input type="checkbox" name="hide_shorts" {{ if .config.HideShorts }}checked{{ end }}>
+                Hide YouTube Shorts from the bulletin</label>
+            <label class="check"><input type="checkbox" name="prune" {{ if .config.Prune }}checked{{ end }}>
+                Remove channels I've unsubscribed from</label>
+        </div>
+
+        <div class="form-actions">
+            <button class="btn primary" type="submit" id="save">Save &amp; sync subscriptions</button>
+            {{ if not .status.LastRun.IsZero }}
+            <span class="muted">
+                Last sync <time datetime="{{ .status.LastRun.UTC.Format "2006-01-02T15:04:05Z07:00" }}">{{ .status.LastRun.Format "Jan 2, 15:04" }}</time>:
+                {{ if .status.Error }}<span class="error">failed</span>{{ else }}{{ .status.Channels }} channels{{ end }}
+            </span>
+            {{ end }}
+        </div>
+    </form>
+
+    <form class="card form" method="post" action="{{ .base }}/setup/takeout" enctype="multipart/form-data">
+        <h2>Or import from Google Takeout</h2>
+        <p class="hint">No API key or public subscriptions needed. In <a href="https://takeout.google.com/" target="_blank" rel="noopener">Google Takeout</a>,
+            export only <strong>YouTube and YouTube Music → subscriptions</strong>, then upload the <code>subscriptions.csv</code> from the archive.</p>
+        <div class="form-actions">
+            <input type="file" name="takeout" accept=".csv,text/csv" required>
+            <button class="btn" type="submit">Import channels</button>
+        </div>
+    </form>
+
+    <section class="card help">
+        <h2>Getting an API key (5 minutes, free)</h2>
+        <ol>
+            <li>Open the <a href="https://console.cloud.google.com/projectcreate" target="_blank" rel="noopener">Google Cloud Console</a> and create a project (any name).</li>
+            <li>Go to <a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank" rel="noopener">APIs &amp; Services → Library → YouTube Data API v3</a> and click <strong>Enable</strong>.</li>
+            <li>Go to <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">Credentials</a> → <strong>Create credentials → API key</strong>.
+                Optionally restrict it to the YouTube Data API v3.</li>
+            <li>Paste the key above.</li>
+        </ol>
+
+        <h2>Making your subscriptions visible to the key</h2>
+        <p>An API key can only read <em>public</em> subscription lists. On YouTube, open
+            <a href="https://www.youtube.com/account_privacy" target="_blank" rel="noopener">Settings → Privacy</a> and switch
+            off <strong>“Keep all my subscriptions private”</strong>.</p>
+        <p>Prefer to keep them private? Use the Google Takeout import above, or add channels by hand in the
+            <a href="{{ .base }}/reader">Reader</a> (paste any channel URL; DailyBee shows every YouTube channel feed in the bulletin).</p>
+
+        <h2>How much quota does this use?</h2>
+        <p>Very little. New videos come from each channel's free public RSS feed, so the API is used only to list your
+            subscriptions (1 unit per 50 channels, once a day) and to look up video lengths (1 unit per 50 videos).
+            The free daily quota is 10,000 units.</p>
+    </section>
+
+    {{ if .requiresAuth }}<p class="muted"><button type="button" class="linklike" id="logout">Log out</button></p>{{ end }}
+</main>
+
+<script src="{{ .base }}/static/dailybee.js"></script>
+</body>
+</html>

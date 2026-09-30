@@ -1,0 +1,26 @@
+# Run with either:
+#   docker compose up -d --build
+#   podman compose up -d --build     (or: podman-compose up -d --build)
+# then open http://localhost:7070
+services:
+  dailybee:
+    build: .
+    image: localhost/dailybee:latest
+    container_name: dailybee
+    restart: unless-stopped
+    ports:
+      # Only reachable from this machine. To open it to your LAN, use
+      # "7070:7070" and set DAILYBEE_AUTH in .env.
+      - "127.0.0.1:7070:7070"
+    environment:
+      # Optional: these can also be entered on the Setup page instead.
+      DAILYBEE_YOUTUBE_API_KEY: ${DAILYBEE_YOUTUBE_API_KEY:-}
+      DAILYBEE_YOUTUBE_CHANNEL: ${DAILYBEE_YOUTUBE_CHANNEL:-}
+      # Optional login, "username:password"
+      DAILYBEE_AUTH: ${DAILYBEE_AUTH:-}
+      TZ: ${TZ:-UTC}
+    volumes:
+      - dailybee-data:/data
+
+volumes:
+  dailybee-data:

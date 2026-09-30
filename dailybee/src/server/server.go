@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/nkanaev/yarr/src/dailybee"
 	"github.com/nkanaev/yarr/src/storage"
 )
 
@@ -19,6 +20,9 @@ type Server struct {
 	Storage   StorageProvider
 	Scheduler FeedScheduler
 	Auth      AuthProvider
+
+	// DailyBee bulletin service; nil disables the bulletin pages.
+	DailyBee *dailybee.Service
 
 	StaticFS fs.FS
 	Template *template.Template

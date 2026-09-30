@@ -70,7 +70,7 @@ func TestIndexGzipped(t *testing.T) {
 	log.SetOutput(io.Discard)
 	log.SetOutput(os.Stderr)
 	handler := testServer().Handler()
-	url := "/"
+	url := "/reader"
 
 	recorder := httptest.NewRecorder()
 	request := httptest.NewRequest("GET", url, nil)

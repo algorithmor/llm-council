@@ -210,7 +210,7 @@ func SettingsDefault() Settings {
 		ThemeName:       "light",
 		ThemeFont:       "",
 		ThemeSize:       1,
-		RefreshRate:     0,
+		RefreshRate:     60, // DailyBee: poll channel feeds hourly by default
 		Language:        "en",
 	}
 }

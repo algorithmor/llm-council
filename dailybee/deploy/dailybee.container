@@ -1,0 +1,23 @@
+# Podman Quadlet unit: starts DailyBee with systemd (rootless works too).
+#   mkdir -p ~/.config/containers/systemd
+#   cp deploy/dailybee.container ~/.config/containers/systemd/
+#   podman build -t localhost/dailybee:latest .
+#   systemctl --user daemon-reload && systemctl --user start dailybee
+[Unit]
+Description=DailyBee - daily YouTube bulletin
+
+[Container]
+Image=localhost/dailybee:latest
+ContainerName=dailybee
+PublishPort=127.0.0.1:7070:7070
+Volume=dailybee-data:/data
+# Environment=DAILYBEE_YOUTUBE_API_KEY=...
+# Environment=DAILYBEE_YOUTUBE_CHANNEL=@yourhandle
+# Environment=DAILYBEE_AUTH=user:password
+Environment=TZ=UTC
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target

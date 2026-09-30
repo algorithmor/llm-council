@@ -1,0 +1,7 @@
+node_modules
+out
+*.db
+*.db-shm
+*.db-wal
+.env
+src/assets/static/bundle.*
