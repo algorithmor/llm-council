@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Startup Atlas</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <h1>Startup Atlas</h1>
+  <p class="sub">Companies from the world's top accelerators, grouped by what they actually build.</p>
+  <div id="stats" class="stats"></div>
+  <div id="sample-banner" class="banner" hidden>Showing bundled <b>sample data</b> with approximate figures. Run <code>python -m startup_atlas.ingest --yc --enrich</code> to load live data.</div>
+</header>
+<div class="layout">
+  <aside>
+    <h2>Domains <button id="clear" class="link">clear</button></h2>
+    <ul id="clusters"></ul>
+  </aside>
+  <main>
+    <div class="filters">
+      <input id="q" type="search" placeholder="Search name, use-case, tag…">
+      <select id="accelerator"><option value="">All accelerators</option></select>
+      <select id="country"><option value="">All countries</option></select>
+      <select id="sort">
+        <option value="raised">Sort: capital raised</option>
+        <option value="valuation">Sort: valuation</option>
+        <option value="founded">Sort: newest</option>
+        <option value="team">Sort: team size</option>
+        <option value="name">Sort: name</option>
+      </select>
+      <label class="num">Raised ≥ $<input id="min_raised" type="number" min="0" placeholder="M" step="1">M</label>
+    </div>
+    <div id="count" class="count"></div>
+    <div id="grid" class="grid"></div>
+    <button id="more" class="more" hidden>Load more</button>
+  </main>
+</div>
+<div id="drawer" class="drawer" hidden>
+  <button id="close" class="close" aria-label="Close">×</button>
+  <div id="detail"></div>
+</div>
+<script src="/static/app.js"></script>
+</body>
+</html>

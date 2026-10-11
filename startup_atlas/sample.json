@@ -1,0 +1,839 @@
+[
+ {
+  "id": "sample-stripe",
+  "name": "Stripe",
+  "accelerator": "Y Combinator",
+  "batch": "S09",
+  "founded_year": 2010,
+  "country": "US",
+  "city": "San Francisco",
+  "industry": "Fintech",
+  "tags": [
+   "payments",
+   "api",
+   "developer-tools"
+  ],
+  "one_liner": "Economic infrastructure for the internet",
+  "description": "Economic infrastructure for the internet.",
+  "status": "Active",
+  "last_round": "Series I",
+  "capital_raised_usd": 9000000000.0,
+  "valuation_usd": 50000000000.0,
+  "sources": [
+   {
+    "name": "Bundled sample (approximate)",
+    "url": null
+   }
+  ]
+ },
+ {
+  "id": "sample-brex",
+  "name": "Brex",
+  "accelerator": "Y Combinator",
+  "batch": "W17",
+  "founded_year": 2017,
+  "country": "US",
+  "city": "San Francisco",
+  "industry": "Fintech",
+  "tags": [
+   "corporate-cards",
+   "spend-management",
+   "b2b"
+  ],
+  "one_liner": "Corporate cards and spend management for startups",
+  "description": "Corporate cards and spend management for startups.",
+  "status": "Active",
+  "last_round": "Series D",
+  "capital_raised_usd": 1500000000.0,
+  "valuation_usd": 12300000000.0,
+  "sources": [
+   {
+    "name": "Bundled sample (approximate)",
+    "url": null
+   }
+  ]
+ },
+ {
+  "id": "sample-razorpay",
+  "name": "Razorpay",
+  "accelerator": "Y Combinator",
+  "batch": "W15",
+  "founded_year": 2014,
+  "country": "IN",
+  "city": "Bengaluru",
+  "industry": "Fintech",
+  "tags": [
+   "payments",
+   "api",
+   "b2b"
+  ],
+  "one_liner": "Payments and banking stack for Indian businesses",
+  "description": "Payments and banking stack for Indian businesses.",
+  "status": "Active",
+  "last_round": "Series F",
+  "capital_raised_usd": 740000000.0,
+  "valuation_usd": 7500000000.0,
+  "sources": [
+   {
+    "name": "Bundled sample (approximate)",
+    "url": null
+   }
+  ]
+ },
+ {
+  "id": "sample-flutterwave",
+  "name": "Flutterwave",
+  "accelerator": "Y Combinator",
+  "batch": "S16",
+  "founded_year": 2016,
+  "country": "NG",
+  "city": "Lagos",
+  "industry": "Fintech",
+  "tags": [
+   "payments",
+   "api",
+   "africa"
+  ],
+  "one_liner": "Payments infrastructure for Africa",
+  "description": "Payments infrastructure for Africa.",
+  "status": "Active",
+  "last_round": "Series D",
+  "capital_raised_usd": 475000000.0,
+  "valuation_usd": 3000000000.0,
+  "sources": [
+   {
+    "name": "Bundled sample (approximate)",
+    "url": null
+   }
+  ]
+ },
+ {
+  "id": "sample-gusto",
+  "name": "Gusto",
+  "accelerator": "Y Combinator",
+  "batch": "W12",
+  "founded_year": 2011,
+  "country": "US",
+  "city": "San Francisco",
+  "industry": "Fintech",
+  "tags": [
+   "payroll",
+   "hr",
+   "b2b"
+  ],
+  "one_liner": "Payroll, benefits and HR for small businesses",
+  "description": "Payroll, benefits and HR for small businesses.",
+  "status": "Active",
+  "last_round": "Series E",
+  "capital_raised_usd": 800000000.0,
+  "valuation_usd": 9600000000.0,
+  "sources": [
+   {
+    "name": "Bundled sample (approximate)",
+    "url": null
+   }
+  ]
+ },
+ {
+  "id": "sample-deel",
+  "name": "Deel",
+  "accelerator": "Y Combinator",
+  "batch": "W19",
+  "founded_year": 2019,
+  "country": "US",
+  "city": "San Francisco",
+  "industry": "Fintech",
+  "tags": [
+   "payroll",
+   "hr",
+   "remote-work"
+  ],
+  "one_liner": "Global payroll and compliance for remote teams",
+  "description": "Global payroll and compliance for remote teams.",
+  "status": "Active",
+  "last_round": "Series D",
+  "capital_raised_usd": 680000000.0,
+  "valuation_usd": 12000000000.0,
+  "sources": [
+   {
+    "name": "Bundled sample (approximate)",
+    "url": null
+   }
+  ]
+ },
+ {
+  "id": "sample-coinbase",
+  "name": "Coinbase",
+  "accelerator": "Y Combinator",
+  "batch": "S12",
+  "founded_year": 2012,
+  "country": "US",
+  "city": "San Francisco",
+  "industry": "Fintech",
+  "tags": [
+   "crypto",
+   "exchange",
+   "payments"
+  ],
+  "one_liner": "Cryptocurrency exchange and wallet",
+  "description": "Cryptocurrency exchange and wallet.",
+  "status": "Public",
+  "last_round": "IPO",
+  "capital_raised_usd": 550000000.0,
+  "valuation_usd": null,
+  "sources": [
+   {
+    "name": "Bundled sample (approximate)",
+    "url": null
+   }
+  ]
+ },
+ {
+  "id": "sample-wise",
+  "name": "Wise",
+  "accelerator": "Seedcamp",
+  "batch": "2011",
+  "founded_year": 2011,
+  "country": "GB",
+  "city": "London",
+  "industry": "Fintech",
+  "tags": [
+   "payments",
+   "remittance",
+   "cross-border"
+  ],
+  "one_liner": "Cheap international money transfers",
+  "description": "Cheap international money transfers.",
+  "status": "Public",
+  "last_round": "IPO",
+  "capital_raised_usd": 900000000.0,
+  "valuation_usd": null,
+  "sources": [
+   {
+    "name": "Bundled sample (approximate)",
+    "url": null
+   }
+  ]
+ },
+ {
+  "id": "sample-supabase",
+  "name": "Supabase",
+  "accelerator": "Y Combinator",
+  "batch": "S20",
+  "founded_year": 2020,
+  "country": "US",
+  "city": "San Francisco",
+  "industry": "Developer Tools",
+  "tags": [
+   "database",
+   "open-source",
+   "backend"
+  ],
+  "one_liner": "Open source Firebase alternative built on Postgres",
+  "description": "Open source Firebase alternative built on Postgres.",
+  "status": "Active",
+  "last_round": "Series D",
+  "capital_raised_usd": 390000000.0,
+  "valuation_usd": 5000000000.0,
+  "sources": [
+   {
+    "name": "Bundled sample (approximate)",
+    "url": null
+   }
+  ]
+ },
+ {
+  "id": "sample-posthog",
+  "name": "PostHog",
+  "accelerator": "Y Combinator",
+  "batch": "W20",
+  "founded_year": 2020,
+  "country": "US",
+  "city": "San Francisco",
+  "industry": "Developer Tools",
+  "tags": [
+   "analytics",
+   "open-source",
+   "product"
+  ],
+  "one_liner": "Open source product analytics suite",
+  "description": "Open source product analytics suite.",
+  "status": "Active",
+  "last_round": "Series D",
+  "capital_raised_usd": 160000000.0,
+  "valuation_usd": 920000000.0,
+  "sources": [
+   {
+    "name": "Bundled sample (approximate)",
+    "url": null
+   }
+  ]
+ },
+ {
+  "id": "sample-retool",
+  "name": "Retool",
+  "accelerator": "Y Combinator",
+  "batch": "W17",
+  "founded_year": 2017,
+  "country": "US",
+  "city": "San Francisco",
+  "industry": "Developer Tools",
+  "tags": [
+   "low-code",
+   "internal-tools",
+   "b2b"
+  ],
+  "one_liner": "Build internal tools fast with low-code",
+  "description": "Build internal tools fast with low-code.",
+  "status": "Active",
+  "last_round": "Series C",
+  "capital_raised_usd": 140000000.0,
+  "valuation_usd": 3200000000.0,
+  "sources": [
+   {
+    "name": "Bundled sample (approximate)",
+    "url": null
+   }
+  ]
+ },
+ {
+  "id": "sample-docker",
+  "name": "Docker",
+  "accelerator": "Y Combinator",
+  "batch": "W10",
+  "founded_year": 2013,
+  "country": "US",
+  "city": "San Francisco",
+  "industry": "Developer Tools",
+  "tags": [
+   "containers",
+   "devops",
+   "open-source"
+  ],
+  "one_liner": "Container platform for building and shipping software",
+  "description": "Container platform for building and shipping software.",
+  "status": "Active",
+  "last_round": "Series E",
+  "capital_raised_usd": 330000000.0,
+  "valuation_usd": 2000000000.0,
+  "sources": [
+   {
+    "name": "Bundled sample (approximate)",
+    "url": null
+   }
+  ]
+ },
+ {
+  "id": "sample-mintlify",
+  "name": "Mintlify",
+  "accelerator": "Y Combinator",
+  "batch": "W22",
+  "founded_year": 2021,
+  "country": "US",
+  "city": "San Francisco",
+  "industry": "Developer Tools",
+  "tags": [
+   "documentation",
+   "developer-tools",
+   "ai"
+  ],
+  "one_liner": "Beautiful documentation for developer products",
+  "description": "Beautiful documentation for developer products.",
+  "status": "Active",
+  "last_round": "Series A",
+  "capital_raised_usd": 20000000.0,
+  "valuation_usd": null,
+  "sources": [
+   {
+    "name": "Bundled sample (approximate)",
+    "url": null
+   }
+  ]
+ },
+ {
+  "id": "sample-resend",
+  "name": "Resend",
+  "accelerator": "Y Combinator",
+  "batch": "W23",
+  "founded_year": 2022,
+  "country": "US",
+  "city": "San Francisco",
+  "industry": "Developer Tools",
+  "tags": [
+   "email",
+   "api",
+   "developer-tools"
+  ],
+  "one_liner": "Email API for developers",
+  "description": "Email API for developers.",
+  "status": "Active",
+  "last_round": "Series A",
+  "capital_raised_usd": 21000000.0,
+  "valuation_usd": null,
+  "sources": [
+   {
+    "name": "Bundled sample (approximate)",
+    "url": null
+   }
+  ]
+ },
+ {
+  "id": "sample-digitalocean",
+  "name": "DigitalOcean",
+  "accelerator": "Techstars",
+  "batch": "2012",
+  "founded_year": 2012,
+  "country": "US",
+  "city": "New York",
+  "industry": "Developer Tools",
+  "tags": [
+   "cloud",
+   "infrastructure",
+   "hosting"
+  ],
+  "one_liner": "Simple cloud hosting for developers",
+  "description": "Simple cloud hosting for developers.",
+  "status": "Public",
+  "last_round": "IPO",
+  "capital_raised_usd": 307000000.0,
+  "valuation_usd": null,
+  "sources": [
+   {
+    "name": "Bundled sample (approximate)",
+    "url": null
+   }
+  ]
+ },
+ {
+  "id": "sample-sendgrid",
+  "name": "SendGrid",
+  "accelerator": "Techstars",
+  "batch": "2009",
+  "founded_year": 2009,
+  "country": "US",
+  "city": "Boulder",
+  "industry": "Developer Tools",
+  "tags": [
+   "email",
+   "api",
+   "developer-tools"
+  ],
+  "one_liner": "Transactional email delivery API",
+  "description": "Transactional email delivery API.",
+  "status": "Acquired",
+  "last_round": "Acquired",
+  "capital_raised_usd": 85000000.0,
+  "valuation_usd": null,
+  "sources": [
+   {
+    "name": "Bundled sample (approximate)",
+    "url": null
+   }
+  ]
+ },
+ {
+  "id": "sample-scale-ai",
+  "name": "Scale AI",
+  "accelerator": "Y Combinator",
+  "batch": "S16",
+  "founded_year": 2016,
+  "country": "US",
+  "city": "San Francisco",
+  "industry": "Artificial Intelligence",
+  "tags": [
+   "data-labeling",
+   "machine-learning",
+   "ai"
+  ],
+  "one_liner": "Training data and evaluation for AI models",
+  "description": "Training data and evaluation for AI models.",
+  "status": "Active",
+  "last_round": "Series F",
+  "capital_raised_usd": 1600000000.0,
+  "valuation_usd": 13800000000.0,
+  "sources": [
+   {
+    "name": "Bundled sample (approximate)",
+    "url": null
+   }
+  ]
+ },
+ {
+  "id": "sample-replicate",
+  "name": "Replicate",
+  "accelerator": "Y Combinator",
+  "batch": "W20",
+  "founded_year": 2019,
+  "country": "US",
+  "city": "San Francisco",
+  "industry": "Artificial Intelligence",
+  "tags": [
+   "machine-learning",
+   "api",
+   "developer-tools"
+  ],
+  "one_liner": "Run machine learning models with an API",
+  "description": "Run machine learning models with an API.",
+  "status": "Active",
+  "last_round": "Series B",
+  "capital_raised_usd": 60000000.0,
+  "valuation_usd": 350000000.0,
+  "sources": [
+   {
+    "name": "Bundled sample (approximate)",
+    "url": null
+   }
+  ]
+ },
+ {
+  "id": "sample-tractable",
+  "name": "Tractable",
+  "accelerator": "Entrepreneur First",
+  "batch": "2014",
+  "founded_year": 2014,
+  "country": "GB",
+  "city": "London",
+  "industry": "Artificial Intelligence",
+  "tags": [
+   "computer-vision",
+   "insurance",
+   "ai"
+  ],
+  "one_liner": "AI that assesses accident and disaster damage from photos",
+  "description": "AI that assesses accident and disaster damage from photos.",
+  "status": "Active",
+  "last_round": "Series E",
+  "capital_raised_usd": 185000000.0,
+  "valuation_usd": 1000000000.0,
+  "sources": [
+   {
+    "name": "Bundled sample (approximate)",
+    "url": null
+   }
+  ]
+ },
+ {
+  "id": "sample-benchling",
+  "name": "Benchling",
+  "accelerator": "Y Combinator",
+  "batch": "W12",
+  "founded_year": 2012,
+  "country": "US",
+  "city": "San Francisco",
+  "industry": "Healthcare",
+  "tags": [
+   "biotech",
+   "r-and-d",
+   "software"
+  ],
+  "one_liner": "Cloud platform for biotech R&D",
+  "description": "Cloud platform for biotech R&D.",
+  "status": "Active",
+  "last_round": "Series F",
+  "capital_raised_usd": 410000000.0,
+  "valuation_usd": 6100000000.0,
+  "sources": [
+   {
+    "name": "Bundled sample (approximate)",
+    "url": null
+   }
+  ]
+ },
+ {
+  "id": "sample-airbnb",
+  "name": "Airbnb",
+  "accelerator": "Y Combinator",
+  "batch": "W09",
+  "founded_year": 2008,
+  "country": "US",
+  "city": "San Francisco",
+  "industry": "Consumer",
+  "tags": [
+   "travel",
+   "marketplace",
+   "hospitality"
+  ],
+  "one_liner": "Marketplace for stays and experiences",
+  "description": "Marketplace for stays and experiences.",
+  "status": "Public",
+  "last_round": "IPO",
+  "capital_raised_usd": 6400000000.0,
+  "valuation_usd": null,
+  "sources": [
+   {
+    "name": "Bundled sample (approximate)",
+    "url": null
+   }
+  ]
+ },
+ {
+  "id": "sample-doordash",
+  "name": "DoorDash",
+  "accelerator": "Y Combinator",
+  "batch": "S13",
+  "founded_year": 2013,
+  "country": "US",
+  "city": "San Francisco",
+  "industry": "Consumer",
+  "tags": [
+   "food-delivery",
+   "marketplace",
+   "logistics"
+  ],
+  "one_liner": "On-demand local delivery marketplace",
+  "description": "On-demand local delivery marketplace.",
+  "status": "Public",
+  "last_round": "IPO",
+  "capital_raised_usd": 2500000000.0,
+  "valuation_usd": null,
+  "sources": [
+   {
+    "name": "Bundled sample (approximate)",
+    "url": null
+   }
+  ]
+ },
+ {
+  "id": "sample-instacart",
+  "name": "Instacart",
+  "accelerator": "Y Combinator",
+  "batch": "W12",
+  "founded_year": 2012,
+  "country": "US",
+  "city": "San Francisco",
+  "industry": "Consumer",
+  "tags": [
+   "grocery-delivery",
+   "marketplace",
+   "logistics"
+  ],
+  "one_liner": "Same-day grocery delivery marketplace",
+  "description": "Same-day grocery delivery marketplace.",
+  "status": "Public",
+  "last_round": "IPO",
+  "capital_raised_usd": 2900000000.0,
+  "valuation_usd": null,
+  "sources": [
+   {
+    "name": "Bundled sample (approximate)",
+    "url": null
+   }
+  ]
+ },
+ {
+  "id": "sample-dropbox",
+  "name": "Dropbox",
+  "accelerator": "Y Combinator",
+  "batch": "S07",
+  "founded_year": 2007,
+  "country": "US",
+  "city": "San Francisco",
+  "industry": "Consumer",
+  "tags": [
+   "file-storage",
+   "saas",
+   "collaboration"
+  ],
+  "one_liner": "Cloud file storage and collaboration",
+  "description": "Cloud file storage and collaboration.",
+  "status": "Public",
+  "last_round": "IPO",
+  "capital_raised_usd": 1700000000.0,
+  "valuation_usd": null,
+  "sources": [
+   {
+    "name": "Bundled sample (approximate)",
+    "url": null
+   }
+  ]
+ },
+ {
+  "id": "sample-reddit",
+  "name": "Reddit",
+  "accelerator": "Y Combinator",
+  "batch": "S05",
+  "founded_year": 2005,
+  "country": "US",
+  "city": "San Francisco",
+  "industry": "Consumer",
+  "tags": [
+   "social",
+   "community",
+   "media"
+  ],
+  "one_liner": "Community-driven social news network",
+  "description": "Community-driven social news network.",
+  "status": "Public",
+  "last_round": "IPO",
+  "capital_raised_usd": 1300000000.0,
+  "valuation_usd": null,
+  "sources": [
+   {
+    "name": "Bundled sample (approximate)",
+    "url": null
+   }
+  ]
+ },
+ {
+  "id": "sample-canva",
+  "name": "Canva",
+  "accelerator": "500 Global",
+  "batch": "2013",
+  "founded_year": 2013,
+  "country": "AU",
+  "city": "Sydney",
+  "industry": "Consumer",
+  "tags": [
+   "design",
+   "saas",
+   "collaboration"
+  ],
+  "one_liner": "Online design and publishing for everyone",
+  "description": "Online design and publishing for everyone.",
+  "status": "Active",
+  "last_round": "Secondary",
+  "capital_raised_usd": 600000000.0,
+  "valuation_usd": 32000000000.0,
+  "sources": [
+   {
+    "name": "Bundled sample (approximate)",
+    "url": null
+   }
+  ]
+ },
+ {
+  "id": "sample-grab",
+  "name": "Grab",
+  "accelerator": "500 Global",
+  "batch": "2012",
+  "founded_year": 2012,
+  "country": "SG",
+  "city": "Singapore",
+  "industry": "Consumer",
+  "tags": [
+   "ride-hailing",
+   "delivery",
+   "payments"
+  ],
+  "one_liner": "Southeast Asia super-app for rides, food and payments",
+  "description": "Southeast Asia super-app for rides, food and payments.",
+  "status": "Public",
+  "last_round": "IPO",
+  "capital_raised_usd": 15000000000.0,
+  "valuation_usd": null,
+  "sources": [
+   {
+    "name": "Bundled sample (approximate)",
+    "url": null
+   }
+  ]
+ },
+ {
+  "id": "sample-udemy",
+  "name": "Udemy",
+  "accelerator": "500 Global",
+  "batch": "2010",
+  "founded_year": 2010,
+  "country": "US",
+  "city": "San Francisco",
+  "industry": "Education",
+  "tags": [
+   "e-learning",
+   "marketplace",
+   "courses"
+  ],
+  "one_liner": "Online learning marketplace",
+  "description": "Online learning marketplace.",
+  "status": "Public",
+  "last_round": "IPO",
+  "capital_raised_usd": 173000000.0,
+  "valuation_usd": null,
+  "sources": [
+   {
+    "name": "Bundled sample (approximate)",
+    "url": null
+   }
+  ]
+ },
+ {
+  "id": "sample-helion-energy",
+  "name": "Helion Energy",
+  "accelerator": "Y Combinator",
+  "batch": "W14",
+  "founded_year": 2013,
+  "country": "US",
+  "city": "Everett",
+  "industry": "Climate & Energy",
+  "tags": [
+   "fusion",
+   "clean-energy",
+   "hardware"
+  ],
+  "one_liner": "Building commercial fusion power",
+  "description": "Building commercial fusion power.",
+  "status": "Active",
+  "last_round": "Series F",
+  "capital_raised_usd": 1000000000.0,
+  "valuation_usd": null,
+  "sources": [
+   {
+    "name": "Bundled sample (approximate)",
+    "url": null
+   }
+  ]
+ },
+ {
+  "id": "sample-boom-supersonic",
+  "name": "Boom Supersonic",
+  "accelerator": "Y Combinator",
+  "batch": "W16",
+  "founded_year": 2014,
+  "country": "US",
+  "city": "Denver",
+  "industry": "Aerospace",
+  "tags": [
+   "supersonic",
+   "aviation",
+   "hardware"
+  ],
+  "one_liner": "Supersonic passenger aircraft",
+  "description": "Supersonic passenger aircraft.",
+  "status": "Active",
+  "last_round": "Series B",
+  "capital_raised_usd": 700000000.0,
+  "valuation_usd": null,
+  "sources": [
+   {
+    "name": "Bundled sample (approximate)",
+    "url": null
+   }
+  ]
+ },
+ {
+  "id": "sample-sphero",
+  "name": "Sphero",
+  "accelerator": "Techstars",
+  "batch": "2011",
+  "founded_year": 2010,
+  "country": "US",
+  "city": "Boulder",
+  "industry": "Hardware",
+  "tags": [
+   "robotics",
+   "education",
+   "consumer-electronics"
+  ],
+  "one_liner": "App-controlled robots for play and learning",
+  "description": "App-controlled robots for play and learning.",
+  "status": "Active",
+  "last_round": "Series C",
+  "capital_raised_usd": 120000000.0,
+  "valuation_usd": null,
+  "sources": [
+   {
+    "name": "Bundled sample (approximate)",
+    "url": null
+   }
+  ]
+ }
+]
